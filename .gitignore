@@ -1,0 +1,73 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go specific
+*.o
+*.a
+*.log
+/vendor/
+/Godeps/
+
+# Air hot reload
+/tmp/
+
+# Environment files
+.env
+config/.env
+*.env.local
+
+# Database files
+*.db
+*.sqlite
+
+# IDE files
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.swp
+*.swo
+.DS_Store
+
+# Output directories
+/bin/
+/dist/
+/build/
+
+# Dependency directories
+/node_modules/
+/jspm_packages/
+/bower_components/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+/coverage/
+/coverage.txt
+/profile.out
+/htmlcov/
+
+# Local config files
+*.local
+config.local.yml
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
