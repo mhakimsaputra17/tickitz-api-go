@@ -16,6 +16,7 @@
 
 # Air hot reload
 /tmp/
+.air.toml
 
 # Environment files
 .env
