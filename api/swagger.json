@@ -1,0 +1,1854 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Tickitz API",
+    "description": "API for Tickitz movie ticket booking application",
+    "version": "1.0.0",
+    "contact": {
+      "email": "support@tickitz.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.tickitz.com/api/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "https://staging-api.tickitz.com/api/v1",
+      "description": "Staging server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Movies",
+      "description": "Movie-related endpoints"
+    },
+    {
+      "name": "Schedules",
+      "description": "Movie schedule endpoints"
+    },
+    {
+      "name": "Authentication",
+      "description": "User authentication and registration"
+    },
+    {
+      "name": "User",
+      "description": "User profile and orders"
+    },
+    {
+      "name": "Admin",
+      "description": "Admin movie management"
+    }
+  ],
+  "paths": {
+    "/movies": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "List all movies with filtering and pagination",
+        "description": "Returns a paginated list of movies that can be filtered by name, genre, and more",
+        "operationId": "getMovies",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filter movies by title (partial match)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "description": "Filter movies by genre ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort by field",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["release_date", "title", "rating"],
+              "default": "release_date"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies/upcoming": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Get upcoming movies",
+        "description": "Returns a list of movies that will be released soon",
+        "operationId": "getUpcomingMovies",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies/popular": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Get popular movies",
+        "description": "Returns a list of movies sorted by popularity",
+        "operationId": "getPopularMovies",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/movies/{id}": {
+      "get": {
+        "tags": ["Movies"],
+        "summary": "Get movie details",
+        "description": "Returns detailed information about a specific movie",
+        "operationId": "getMovieById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the movie",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules": {
+      "get": {
+        "tags": ["Schedules"],
+        "summary": "Get movie schedules",
+        "description": "Returns schedules for movies at various cinemas",
+        "operationId": "getSchedules",
+        "parameters": [
+          {
+            "name": "movie_id",
+            "in": "query",
+            "description": "Filter schedules by movie ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "city_id",
+            "in": "query",
+            "description": "Filter schedules by city ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cinema_id",
+            "in": "query",
+            "description": "Filter schedules by cinema ID",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Filter schedules by date (YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules/{id}/seats": {
+      "get": {
+        "tags": ["Schedules"],
+        "summary": "Get available seats for a showtime",
+        "description": "Returns the status of all seats for a specific showtime",
+        "operationId": "getShowtimeSeats",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the showtime",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeatMapResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Showtime not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Register new user",
+        "description": "Creates a new user account",
+        "operationId": "registerUser",
+        "requestBody": {
+          "description": "User registration information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegistration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email or username already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Login",
+        "description": "Authenticates a user and returns a JWT token",
+        "operationId": "loginUser",
+        "requestBody": {
+          "description": "User credentials",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user profile",
+        "description": "Returns the profile information of the authenticated user",
+        "operationId": "getUserProfile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Update user profile",
+        "description": "Updates the profile information of the authenticated user",
+        "operationId": "updateUserProfile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Profile information to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdate"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profile_image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile image file"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "phone_number": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/orders": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Create new order",
+        "description": "Creates a new booking for the authenticated user",
+        "operationId": "createOrder",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Booking information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Seat already booked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["User"],
+        "summary": "Get order history",
+        "description": "Returns the booking history of the authenticated user",
+        "operationId": "getOrderHistory",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by booking status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "paid", "completed", "cancelled"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/movies": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get all movies (admin view)",
+        "description": "Returns a paginated list of all movies with complete details for admin",
+        "operationId": "getAdminMovies",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMovieListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not an admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Create new movie",
+        "description": "Adds a new movie to the database",
+        "operationId": "createMovie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Movie information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "The Matrix Resurrections"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "duration": {
+                    "type": "integer",
+                    "example": 148
+                  },
+                  "release_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "poster": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "backdrop": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "rating": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "genres": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "required": ["title", "duration", "release_date"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Movie created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not an admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/movies/{id}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update movie",
+        "description": "Updates an existing movie",
+        "operationId": "updateMovie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the movie to update",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Movie information to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "duration": {
+                    "type": "integer"
+                  },
+                  "release_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "poster": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "backdrop": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "rating": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "genres": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Movie updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not an admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admin"],
+        "summary": "Delete movie",
+        "description": "Deletes an existing movie",
+        "operationId": "deleteMovie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the movie to delete",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movie deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Movie successfully deleted"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not an admin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total number of items",
+            "example": 150
+          },
+          "page": {
+            "type": "integer",
+            "description": "Current page number",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of items per page",
+            "example": 10
+          },
+          "total_pages": {
+            "type": "integer",
+            "description": "Total number of pages",
+            "example": 15
+          },
+          "next_page": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Next page number or null if on the last page",
+            "example": 2
+          },
+          "prev_page": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Previous page number or null if on the first page",
+            "example": null
+          }
+        }
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "genre_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Action"
+          }
+        }
+      },
+      "Movie": {
+        "type": "object",
+        "properties": {
+          "movie_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "The Matrix Resurrections"
+          },
+          "description": {
+            "type": "string",
+            "example": "Return to a world of two realities: one, everyday life; the other, what lies behind it."
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Duration in minutes",
+            "example": 148
+          },
+          "release_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2021-12-22"
+          },
+          "poster_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/posters/matrix4.jpg"
+          },
+          "backdrop_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/backdrops/matrix4.jpg"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "example": 7.5
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            }
+          }
+        }
+      },
+      "MovieSummary": {
+        "type": "object",
+        "properties": {
+          "movie_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "The Matrix Resurrections"
+          },
+          "poster_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/posters/matrix4.jpg"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "example": 7.5
+          },
+          "release_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2021-12-22"
+          }
+        }
+      },
+      "MovieListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MovieSummary"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "MovieDetailResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Movie"
+          }
+        }
+      },
+      "AdminMovieListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Movie"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "Cinema": {
+        "type": "object",
+        "properties": {
+          "cinema_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "CineOne21 CBD Jakarta"
+          },
+          "address": {
+            "type": "string",
+            "example": "Plaza Indonesia Level 6, Jl. M.H. Thamrin No.28-30"
+          },
+          "city": {
+            "type": "object",
+            "properties": {
+              "city_id": {
+                "type": "integer",
+                "example": 1
+              },
+              "name": {
+                "type": "string",
+                "example": "Jakarta"
+              }
+            }
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/cinema/cineone21.jpg"
+          }
+        }
+      },
+      "Showtime": {
+        "type": "object",
+        "properties": {
+          "showtime_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "movie": {
+            "$ref": "#/components/schemas/MovieSummary"
+          },
+          "cinema": {
+            "$ref": "#/components/schemas/Cinema"
+          },
+          "start_time": {
+            "type": "string",
+            "example": "13:30"
+          },
+          "end_time": {
+            "type": "string",
+            "example": "15:58"
+          },
+          "show_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2023-06-15"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 50000
+          }
+        }
+      },
+      "ShowtimeListItem": {
+        "type": "object",
+        "properties": {
+          "showtime_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "start_time": {
+            "type": "string",
+            "example": "13:30"
+          },
+          "end_time": {
+            "type": "string",
+            "example": "15:58"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 50000
+          }
+        }
+      },
+      "CinemaWithShowtimes": {
+        "type": "object",
+        "properties": {
+          "cinema_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "CineOne21 CBD Jakarta"
+          },
+          "city": {
+            "type": "object",
+            "properties": {
+              "city_id": {
+                "type": "integer",
+                "example": 1
+              },
+              "name": {
+                "type": "string",
+                "example": "Jakarta"
+              }
+            }
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/cinema/cineone21.jpg"
+          },
+          "showtimes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShowtimeListItem"
+            }
+          }
+        }
+      },
+      "ScheduleListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CinemaWithShowtimes"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "SeatStatus": {
+        "type": "object",
+        "properties": {
+          "seat_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "row": {
+            "type": "string",
+            "example": "A"
+          },
+          "number": {
+            "type": "string",
+            "example": "1"
+          },
+          "category": {
+            "type": "string",
+            "example": "Regular"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["available", "reserved", "sold"],
+            "example": "available"
+          }
+        }
+      },
+      "SeatMapResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "showtime": {
+                "$ref": "#/components/schemas/Showtime"
+              },
+              "seats": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SeatStatus"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserRegistration": {
+        "type": "object",
+        "required": ["username", "email", "password", "password_confirmation"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecureP@ssw0rd"
+          },
+          "password_confirmation": {
+            "type": "string",
+            "format": "password",
+            "example": "SecureP@ssw0rd"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "08123456789"
+          }
+        }
+      },
+      "UserLogin": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecureP@ssw0rd"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "johndoe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                  }
+                }
+              },
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              },
+              "token_type": {
+                "type": "string",
+                "example": "Bearer"
+              },
+              "expires_in": {
+                "type": "integer",
+                "example": 86400
+              }
+            }
+          }
+        }
+      },
+      "UserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user_id": {
+                "type": "integer",
+                "example": 1
+              },
+              "username": {
+                "type": "string",
+                "example": "johndoe"
+              },
+              "email": {
+                "type": "string",
+                "example": "john.doe@example.com"
+              },
+              "first_name": {
+                "type": "string",
+                "example": "John"
+              },
+              "last_name": {
+                "type": "string",
+                "example": "Doe"
+              },
+              "phone_number": {
+                "type": "string",
+                "example": "08123456789"
+              },
+              "profile_image": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://example.com/profiles/johndoe.jpg"
+              },
+              "loyalty_points": {
+                "type": "integer",
+                "example": 250
+              },
+              "tier": {
+                "type": "string",
+                "example": "Silver"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2023-01-15T08:30:00Z"
+              }
+            }
+          }
+        }
+      },
+      "UserProfileUpdate": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "phone_number": {
+            "type": "string",
+            "example": "08123456789"
+          }
+        }
+      },
+      "BookingRequest": {
+        "type": "object",
+        "required": ["showtime_id", "seats", "payment_method"],
+        "properties": {
+          "showtime_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [1, 2, 3]
+          },
+          "payment_method": {
+            "type": "string",
+            "example": "credit_card"
+          }
+        }
+      },
+      "BookingSeat": {
+        "type": "object",
+        "properties": {
+          "seat_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "row": {
+            "type": "string",
+            "example": "A"
+          },
+          "number": {
+            "type": "string",
+            "example": "1"
+          },
+          "category": {
+            "type": "string",
+            "example": "Regular"
+          }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "payment_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "payment_method": {
+            "type": "string",
+            "example": "credit_card"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "failed", "refunded"],
+            "example": "pending"
+          },
+          "amount": {
+            "type": "number",
+            "format": "float",
+            "example": 150000
+          },
+          "transaction_id": {
+            "type": "string",
+            "example": "TRX-12345678"
+          },
+          "paid_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": null
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-06-15T10:30:00Z"
+          }
+        }
+      },
+      "Booking": {
+        "type": "object",
+        "properties": {
+          "booking_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "showtime": {
+            "$ref": "#/components/schemas/Showtime"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookingSeat"
+            }
+          },
+          "booking_date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-06-15T10:30:00Z"
+          },
+          "total_amount": {
+            "type": "number",
+            "format": "float",
+            "example": 150000
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "paid", "completed", "cancelled"],
+            "example": "pending"
+          },
+          "payment": {
+            "$ref": "#/components/schemas/Payment"
+          }
+        }
+      },
+      "BookingResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Booking"
+          }
+        }
+      },
+      "BookingListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Booking"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "MovieRequest": {
+        "type": "object",
+        "required": ["title", "duration", "release_date"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "The Matrix Resurrections"
+          },
+          "description": {
+            "type": "string",
+            "example": "Return to a world of two realities: one, everyday life; the other, what lies behind it."
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Duration in minutes",
+            "example": 148
+          },
+          "release_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2021-12-22"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "example": 7.5
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "example": [1, 4, 7]
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string",
+            "example": "Resource not found"
+          },
+          "errors": {
+            "type": "object",
+            "nullable": true,
+            "example": {
+              "email": ["The email has already been taken."],
+              "password": ["The password must be at least 8 characters."]
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
