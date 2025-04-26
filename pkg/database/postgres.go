@@ -10,14 +10,16 @@ import (
 )
 
 func NewPostgresPool(cfg *config.Config) (*pgxpool.Pool, error) {
+	//  Make Data Source Name for database connection
 	dsn := fmt.Sprintf(
 		 "postgres://%s:%s@%s:%s/%s",
 		 cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
 	)
-
+	// Make context with timeout
 	ctx, cancel :=context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// make pool connection
 	pool, err:= pgxpool.New(ctx, dsn)
 	if err != nil {
 		return nil, err
