@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/mhakimsaputra17/tickitz-api-go/internal/model"
 	"github.com/mhakimsaputra17/tickitz-api-go/internal/repository"
+	"github.com/mhakimsaputra17/tickitz-api-go/internal/util"
 )
 
 // AuthHandler handles authentication-related endpoints
@@ -25,46 +24,31 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	var input model.UserRegister
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status": "error",
-			"message": err.Error(),
-		})
+		util.BadRequestResponse(c, "Invalid input", err.Error())
 		return
 	}
 
 	// Check if user already exists
 	_, err := h.userRepo.GetUserByEmail(c, input.Email)
 	if err == nil {
-		c.JSON(http.StatusConflict, gin.H{
-			"status": "error",
-			"message": "Email already exists",
-		})
+		util.ConflictResponse(c, "Email already exists")
 		return
 	}
 
 	user, err := h.userRepo.CreateUser(c, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status": "error",
-			"message": "Failed to create user",
-		})
+		util.ServerErrorResponse(c, "Failed to create user")
 		return
 	}
 
-	// Build response according to API spec
-	response := model.AuthResponse{
-		Status: "success",
-		Data: struct {
-			User      model.User `json:"user"`
-			Token     string     `json:"token,omitempty"`
-			TokenType string     `json:"token_type,omitempty"`
-			ExpiresIn int        `json:"expires_in,omitempty"`
-		}{
-			User: user,
-		},
+	// Struktur data respons
+	responseData := struct {
+		User model.User `json:"user"`
+	}{
+		User: user,
 	}
 
-	c.JSON(http.StatusCreated, response)
+	util.CreatedResponse(c, "User registered successfully", responseData)
 }
 
 // Login handles user authentication
@@ -72,10 +56,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var input model.UserLogin
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status": "error",
-			"message": err.Error(),
-		})
+		util.BadRequestResponse(c, "Invalid input", err.Error())
 		return
 	}
 
@@ -83,39 +64,28 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	user, err := h.userRepo.GetUserByEmail(c, input.Email)
 	
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status": "error",
-			"message": "Invalid credentials",
-		})
+		util.UnauthorizedResponse(c, "Invalid credentials")
 		return
 	}
 
 	// Verify password 
 	if !h.userRepo.VerifyPassword(user.PasswordHash, input.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status": "error",
-			"message": "Invalid credentials",
-		})
+		util.UnauthorizedResponse(c, "Invalid credentials")
 		return
 	}
 
-	// TODO: In the future, you'd generate a JWT token here
-
-	// Build response according to API spec
-	response := model.AuthResponse{
-		Status: "success",
-		Data: struct {
-			User      model.User `json:"user"`
-			Token     string     `json:"token,omitempty"`
-			TokenType string     `json:"token_type,omitempty"`
-			ExpiresIn int        `json:"expires_in,omitempty"`
-		}{
-			User:      user,
-			Token:     "dummy-token", // Replace with actual JWT token
-			TokenType: "Bearer",
-			ExpiresIn: 86400, // 24 hours in seconds
-		},
+	// Struktur data respons
+	responseData := struct {
+		User      model.User `json:"user"`
+		Token     string     `json:"token"`
+		TokenType string     `json:"token_type"`
+		ExpiresIn int        `json:"expires_in"`
+	}{
+		User:      user,
+		Token:     "dummy-token", // Ganti dengan JWT asli
+		TokenType: "Bearer",
+		ExpiresIn: 86400, // 24 jam dalam detik
 	}
 
-	c.JSON(http.StatusOK, response)
+	util.OkResponse(c, "Login successful", responseData)
 }
