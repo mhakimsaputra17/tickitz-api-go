@@ -4,86 +4,51 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mhakimsaputra17/tickitz-api-go/internal/model"
 	"github.com/mhakimsaputra17/tickitz-api-go/internal/repository"
 )
 
-// AuthHandler handles authentication requests
-type AuthHandler struct {
-	userRepo *repository.UserRepository
+// UserHandler handles user-related endpoints
+type UserHandler struct {
+    userRepo *repository.UserRepository
 }
 
-// NewAuthHandler creates a new AuthHandler instance
-func NewAuthHandler (userRepo *repository.UserRepository) *AuthHandler {
-	return &AuthHandler{
-		userRepo: userRepo,
-	}
+// NewUserHandler creates a new UserHandler instance
+func NewUserHandler(userRepo *repository.UserRepository) *UserHandler {
+    return &UserHandler{
+        userRepo: userRepo,
+    }
 }
 
-// Register handles user registration
-
-func (h *AuthHandler) Register(c *gin.Context){
-	var input model.UserRegister
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-
-	// Check if user already exists
-	_, err := h.userRepo.GetUserByEmail(c, input.Email)
-	if err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
-		return
-	}
-
-	user, err := h.userRepo.CreateUser(c, input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, model.AuthResponse{
-		User: user,
-		Message : "User registered successfully",
-	})
+// GetProfile handles the GET /user/profile endpoint
+func (h *UserHandler) GetProfile(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Dummy GetProfile endpoint",
+        "status": "success",
+    })
 }
 
-// Login handles user authentication
-func (h *AuthHandler) Login (c *gin.Context){
-	var input model.UserLogin
+// UpdateProfile handles the PUT /user/profile endpoint
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Dummy UpdateProfile endpoint",
+        "status": "success",
+    })
+}
 
-	if err:= c.ShouldBindJSON(&input); err!= nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error" : err.Error()})
-		return 
-	}
+// GetOrders handles the GET /user/orders endpoint
+func (h *UserHandler) GetOrders(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Dummy GetOrders endpoint",
+        "status": "success",
+    })
+}
 
-	// Get user from database
-	user, err := h.userRepo.GetUserByEmail(c, input.Email)
-	
-	if err!= nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error" : "Invalid credentials",
-		})
-		return
-	}
-
-	// Verify password 
-	if !h.userRepo.VerifyPassword(user.PasswordHash, input.PasswordHash){
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error" :"Invalid credentials",
-		})
-		return
-	}
-
-	// Clear password field for response
-	c.JSON(http.StatusOK, model.AuthResponse{
-		User: user,
-		Message: "Login successful",
-	})
-
-
+// CreateOrder handles the POST /user/orders endpoint
+func (h *UserHandler) CreateOrder(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Dummy CreateOrder endpoint",
+        "status": "success",
+    })
 }
 
 
