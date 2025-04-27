@@ -18,6 +18,7 @@ func NewPostgresPool(cfg *config.Config) (*pgxpool.Pool, error) {
 	// Make context with timeout
 	ctx, cancel :=context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	
 
 	// make pool connection
 	pool, err:= pgxpool.New(ctx, dsn)
