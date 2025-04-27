@@ -16,23 +16,23 @@ type UserRepository struct {
 }
 
 // NewUserRepository creates a new UserRepository instance
-func NewUserRepository(db *pgxpool.Pool) *UserRepository{
+func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 	return &UserRepository{db: db}
 }
 
 // CreateUser adds a new user to the database with hashed password
-func (r *UserRepository) CreateUser (ctx context.Context, user model.UserRegister ) (model.User, error){
-	// Hash the password 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PasswordHash), bcrypt.DefaultCost)
+func (r *UserRepository) CreateUser(ctx context.Context, user model.UserRegister) (model.User, error) {
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return model.User{}, err
 	}
 
 	var createdUser model.User
-	query:= `
-		 INSERT INTO users (username, email, password_hash, first_name, last_name, created_at, updated_at) 
-        VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) 
-        RETURNING user_id, username, email, first_name, last_name ,created_at, updated_at
+	query := `
+		INSERT INTO users (username, email, password_hash, first_name, last_name, phone_number, created_at, updated_at) 
+        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) 
+        RETURNING user_id, username, email, first_name, last_name, phone_number, created_at, updated_at
     `
 	err = r.db.QueryRow(ctx, query,
 		user.Username,
@@ -40,13 +40,14 @@ func (r *UserRepository) CreateUser (ctx context.Context, user model.UserRegiste
 		string(hashedPassword),
 		user.FirstName,
 		user.LastName,
-
+		user.PhoneNumber,
 	).Scan(
 		&createdUser.ID,
 		&createdUser.Username,
 		&createdUser.Email,
 		&createdUser.FirstName,
 		&createdUser.LastName,
+		&createdUser.PhoneNumber,
 		&createdUser.CreatedAt,
 		&createdUser.UpdatedAt,
 	)
@@ -55,13 +56,12 @@ func (r *UserRepository) CreateUser (ctx context.Context, user model.UserRegiste
 	}
 
 	return createdUser, nil
-
 }
 
-// GetUserByUsername retrieves a user by username
-func (r *UserRepository) GetUserByEmail(ctx context.Context, email string ) (model.User, error){
+// GetUserByEmail retrieves a user by email
+func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
 	var user model.User
-	query :=  `
+	query := `
         SELECT user_id, username, email, password_hash, first_name, last_name, created_at, updated_at 
         FROM users WHERE email = $1
     `
@@ -78,19 +78,14 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string ) (mod
 	)
 
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows){
+		if errors.Is(err, pgx.ErrNoRows) {
 			return model.User{}, errors.New("user not found")
 		}
 		return model.User{}, err
 	}
 
 	return user, nil
-
-
-
 }
-
-
 
 // VerifyPassword checks if the provided password matches the hashed one
 func (r *UserRepository) VerifyPassword(hashedPassword, password string) bool {
