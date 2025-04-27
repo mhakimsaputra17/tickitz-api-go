@@ -5,7 +5,48 @@ import (
 	"github.com/mhakimsaputra17/tickitz-api-go/internal/handler"
 )
 
-func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler){
-	r.POST("/register", authHandler.Register)
-	r.POST("/login", authHandler.Login)
+func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, movieHandler *handler.MovieHandler, scheduleHandler *handler.ScheduleHandler, adminHandler *handler.AdminHandler, userHandler *handler.UserHandler) {
+	// API version group
+	api := r.Group("/api/v1")
+	
+	// Auth routes
+	auth := api.Group("/auth")
+	{
+		auth.POST("/register", authHandler.Register)
+		auth.POST("/login", authHandler.Login)
+	}
+
+	// Movies routes
+	movies := api.Group("/movies")
+	{
+		movies.GET("", movieHandler.GetMovies)
+		movies.GET("/upcoming", movieHandler.GetUpcomingMovies)
+		movies.GET("/popular", movieHandler.GetPopularMovies)
+		movies.GET("/:id", movieHandler.GetMovieByID)
+	}
+
+	// Schedules routes
+	schedules := api.Group("/schedules")
+	{
+		schedules.GET("", scheduleHandler.GetSchedules)
+		schedules.GET("/:id/seats", scheduleHandler.GetShowtimeSeats)
+	}
+	
+	// User routes
+	user := api.Group("/user")
+	{
+		user.GET("/profile", userHandler.GetProfile)
+		user.PUT("/profile", userHandler.UpdateProfile)
+		user.GET("/orders", userHandler.GetOrders)
+		user.POST("/orders", userHandler.CreateOrder)
+	}
+
+	// Admin routes
+	admin := api.Group("/admin")
+	{
+		admin.GET("/movies", adminHandler.GetMovies)
+		admin.POST("/movies", adminHandler.CreateMovie)
+		admin.PUT("/movies/:id", adminHandler.UpdateMovie)
+		admin.DELETE("/movies/:id", adminHandler.DeleteMovie)
+	}
 }
