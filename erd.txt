@@ -1,0 +1,143 @@
+// Tickitz App Database Diagram (Revised)
+
+// Added Cities table as mentioned in the comment
+Table Cities {
+  city_id int [pk, increment]
+  name varchar(100) [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Users {
+  user_id int [pk, increment]
+  username varchar(255) [not null, unique]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+  // Split full_name into first_name and last_name as requested
+  first_name varchar(100)
+  last_name varchar(100)
+  phone_number varchar(20)
+  profile_image varchar(255)
+  // Added loyalty fields as requested
+  loyalty_points int [default: 0]
+  tier varchar(50) [default: 'Bronze']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Movies {
+  movie_id int [pk, increment]
+  title varchar(255) [not null]
+  description text
+  duration int
+  release_date date
+  poster_url varchar(255)
+  backdrop_url varchar(255)
+  rating decimal(3,1)
+  // Removed is_upcoming as requested
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Genres {
+  genre_id int [pk, increment]
+  name varchar(100) [not null]
+}
+
+Table Movie_Genres {
+  // Added proper ID for primary key
+  movie_genre_id int [pk, increment]
+  movie_id int [not null]
+  genre_id int [not null]
+  
+  // Changed to unique constraint instead of PK
+  indexes {
+    (movie_id, genre_id) [unique]
+  }
+}
+
+Table Cinemas {
+  cinema_id int [pk, increment]
+  name varchar(255) [not null]
+  // Removed location as requested
+  address text
+  // Added city_id foreign key instead of varchar city
+  city_id int [not null]
+  image_url varchar(255)
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Showtimes {
+  showtime_id int [pk, increment]
+  movie_id int [not null]
+  cinema_id int [not null]
+  start_time time [not null]
+  end_time time
+  show_date date [not null]
+  price decimal(10,2) [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Seats {
+  seat_id int [pk, increment]
+  row varchar(10) [not null]
+  number varchar(10) [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Bookings {
+  booking_id int [pk, increment]
+  user_id int [not null]
+  showtime_id int [not null]
+  // Added payment_id reference since relationship was noted as "kebalik" (reversed)
+
+  booking_date timestamp [default: `now()`]
+  total_amount decimal(10,2) [not null]
+  status varchar(50) [not null, default: 'pending']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table Booking_Seats {
+  booking_id int [not null]
+  seat_id int [not null]
+  showtime_id int [not null]
+  // status varchar(50) [default: 'reserved']
+  
+  indexes {
+    (booking_id, seat_id, showtime_id) [pk]
+  }
+}
+
+Table Payments {
+  payment_id int [pk, increment]
+  // Removed booking_id as per request since relationship is reversed
+  payment_method varchar(100) [not null]
+  status varchar(50) [not null, default: 'pending']
+  // Added necessary field to store payment amount
+  // amount decimal(10,2) [not null]
+  // Added transaction ID which is usually required for payment processing
+  // transaction_id varchar(255)
+  // Added paid_at to track when payment was completed
+  // paid_at timestamp
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+// References
+Ref: Movie_Genres.movie_id > Movies.movie_id
+Ref: Movie_Genres.genre_id > Genres.genre_id
+Ref: Cinemas.city_id > Cities.city_id
+Ref: Showtimes.movie_id > Movies.movie_id
+Ref: Showtimes.cinema_id > Cinemas.cinema_id
+
+Ref: Bookings.user_id > Users.user_id
+Ref: Bookings.showtime_id > Showtimes.showtime_id
+// Reversed the relationship as per your comment
+
+Ref: Booking_Seats.booking_id > Bookings.booking_id
+Ref: Booking_Seats.seat_id > Seats.seat_id
+Ref: Booking_Seats.showtime_id > Showtimes.showtime_id
